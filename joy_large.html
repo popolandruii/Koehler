@@ -1,0 +1,194 @@
+<html>
+<head>
+    <script type="text/javascript"></script><script src="./p5.js" type="text/javascript"></script>
+    <!-- <script src="./js/jquery.min.js"></script>
+</head>
+    <script src="./js/jquery.min.js"></script> -->
+</head>
+<body style="margin:0px;padding: 0px;background-color: #000000">
+<!-- <div id="picname" style="position:absolute;top:500px;font-size: 18px;font-family: Orator std;width:500px;color: snow;line-height: 72px;font-weight: lighter;text-align: center;"></div> -->
+</body>
+<script>
+    const particleAmount = 5;
+    const particleSize = 10;
+    const tail = 50;
+    const particleMaxSpeed = .08;
+    const particleMinSpeed = .03;
+    var allParticles = [];
+    var r = 200;
+
+    var color1 = 'rgb(255,215,136)',color2 = 'rgb(235,255,0)';
+    var size = 0;//透明系数
+
+    class Particle{
+        constructor(r, t, p, dt, dp){
+            this.r = r;
+            this.t = new Array(tail);
+            this.p = new Array(tail);
+            for (let n = 0; n < tail; n++){
+                this.t[n] = t;
+                this.p[n] = p;
+            }
+            this.dt = dt;
+            this.dp = dp;
+        }
+
+        move(){
+            this.t.unshift(this.t[0] + this.dt);
+            this.p.unshift(this.p[0] + this.dp);
+            this.t.pop();
+            this.p.pop();
+        }
+
+        getCartesianPosition(){
+            let cartesianPosition = new Array(tail);
+            for (let n = 0; n < this.p.length; n++){
+                cartesianPosition[n] = new p5.Vector(this.r * sin(this.p[n]) * cos(this.t[n]), this.r * sin(this.p[n]) * sin(this.t[n]), this.r * cos(this.p[n]));
+            }
+            return cartesianPosition;
+        }
+    }
+
+    function setup() {
+        createCanvas(500, 500, WEBGL);
+        for (let n = 0; n < particleAmount; n++){
+            let t = PI * Math.random();
+            let p = TWO_PI * Math.random();
+            let dt = Math.random() * (particleMaxSpeed - particleMinSpeed) + particleMinSpeed;
+            let dp = Math.random() * (particleMaxSpeed - particleMinSpeed) + particleMinSpeed;
+            let newParticle = new Particle(r, t, p, dt, dp);
+            allParticles.push(newParticle);
+        }
+        colorMode(HSB);
+    }
+    function draw(data) {
+        if(data !== undefined){
+            var rank = data[0];
+            color1 = "#" + ((1 << 24) + (255 << 16) + (randomNum(215-rank*25,215-(rank-1)*25) << 8) + 136).toString(16).slice(1);
+            color2 = "#" + ((1 << 24) + (randomNum(235-rank*7,235-(rank-1)*7) << 16) + (255 << 8) + 0).toString(16).slice(1);
+            size = 2 * data[1];
+            console.log(color1,color2);
+        }
+        var mycanvas = document.getElementById("defaultCanvas0");
+        var ctx=mycanvas.getContext("2d");
+        // var grad=ctx.createRadialGradient(0,0,150,0,0,300) ;//创建一个渐变色线性对象
+        // grad.addColorStop(0,color1);                  //定义渐变色颜色
+        // grad.addColorStop(1,color2);
+        // ctx.fillStyle=grad;
+        // blur_fn(size);
+
+        //rotating view
+        orbitControl();
+        rotateX(frameCount * 0.005);
+        rotateY(frameCount * 0.005);
+
+        //lighting
+        ambientLight(150);
+
+        //clear screen
+        background(0);
+
+        //draw core
+        stroke(30);
+        fill(color1);
+        sphere(r * .7);
+        fill(color2);
+
+        noStroke()
+
+        //draw particles
+        for (let m = 0; m < allParticles.length; m++){
+            let cartesianPosition = allParticles[m].getCartesianPosition();
+            allParticles[m].move();
+
+            for (let n = 0; n < cartesianPosition.length; n++){
+                push();
+                translate(cartesianPosition[n].x, cartesianPosition[n].y, cartesianPosition[n].z);
+                let f = 1 - n / cartesianPosition.length;
+                ambientMaterial(150+200*f, 50, 50, .1);
+                sphere(particleSize * f * 2);	//glow
+                ambientMaterial(150+200*f, 50, 50, f);
+                sphere(particleSize);
+                //sphere(particleSize * f);
+                pop();
+            }
+        }
+    }
+    function saveaslocal(name,datetxt){
+        $('#picname').html(name+' '+datetxt);
+        var myCanvas = document.getElementById("defaultCanvas0");
+        var a = document.createElement("a");
+        // a.href = myCanvas.toDataURL();
+        // a.download = name;
+        // a.click();
+        setTimeout(function(){
+            a.href = myCanvas.toDataURL();
+            a.download = name;
+            a.click();
+        },1000)
+    }
+    function randomNum(minNum,maxNum) {
+        switch (arguments.length) {
+            case 1:
+                return parseInt(Math.random() * minNum + 1, 10);
+                break;
+            case 2:
+                return parseInt(Math.random() * (maxNum - minNum + 1) + minNum, 10);
+                break;
+            default:
+                return 0;
+                break;
+        }
+    }
+    function blur_fn(size) {
+        var myCanvas = document.getElementById("defaultCanvas0");
+        var context_a = myCanvas.getContext("2d");
+        var canvas_w = 600;
+        var canvas_h = 600;
+        var img_data = context_a.getImageData(0, 0, canvas_w, canvas_h)
+        var px_data = img_data.data
+
+        var img_data2 = context_a.getImageData(0, 0, canvas_w, canvas_h)
+        var px_data2 = img_data2.data
+
+        // var size = 5
+
+        for (var i = 0; i < canvas_w; i++) {
+            for (var j = 0; j < canvas_h; j++) {
+
+                var r_sum = 0
+                var g_sum = 0
+                var b_sum = 0
+                var ci = 0
+                for (var dx = 0; dx < size; dx++) {
+                    for (var dy = 0; dy < size; dy++) {
+                        var x = i + dx
+                        var y = j + dy
+                        if (x >= canvas_w || y >= canvas_h) {
+
+                        } else {
+                            ci++
+                            var px_index = y * canvas_w + x
+                            r_sum += px_data[px_index * 4 + 0]
+                            g_sum += px_data[px_index * 4 + 1]
+                            b_sum += px_data[px_index * 4 + 2]
+                        }
+
+                    }
+                }
+                var r_avg = r_sum / ci
+                var g_avg = g_sum / ci
+                var b_avg = b_sum / ci
+
+                var cur_px_index = j * canvas_w + i
+
+                px_data2[cur_px_index * 4 + 0] = r_avg
+                px_data2[cur_px_index * 4 + 1] = g_avg
+                px_data2[cur_px_index * 4 + 2] = b_avg
+            }
+        }
+
+        context_a.putImageData(img_data2, 0, 0, 0, 0, canvas_w, canvas_h)
+    }
+</script>
+</html>

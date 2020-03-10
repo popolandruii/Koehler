@@ -1,0 +1,23 @@
+{
+  "name": "koehler",
+  "version": "1.0.0",
+  "description": "do you love me? why dont you?",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/popolandruii/koehler.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/popolandruii/koehler/issues"
+  },
+  "homepage": "https://github.com/popolandruii/koehler#readme",
+  "dependencies": {
+    "jquery": "^3.4.1",
+    "p5": "^1.0.0"
+  }
+}

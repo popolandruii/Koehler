@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>hhhh</title>
+    <!-- <script src="./index.js"></script> -->
+    <script scr='./p5.js'></script>
+</head>
+
+<body>
+    <!-- <div></div> -->
+    <script>
+        var cc = {
+            x: 90,
+            y: 120,
+            dia: 20
+        }
+        var coz = {
+            r: 20,
+            g: 30,
+            b: 49
+        }
+        //var sto=5
+        var bbac = {
+            r: 90,
+            g: 80,
+            b: 30
+        }
+        function setup() {
+            createCanvas(400, 400);
+            background(200, 40, 90)
+        }
+
+        function draw() {
+            cc.x = random(0, width);
+            cc.y = random(0, height);
+            coz.r = random(90, 255)
+            coz.g = random(0, 200)
+            coz.b = random(0, 200)
+            // sto=random(0,6)
+            bbac.r = random(0, 255)
+            bbac.g = random(0, 255)
+            bbac.b = random(0, 255)
+            stroke(coz.r, coz.g, coz.b)
+            noFill();
+            strokeWeight(5)
+            circle(cc.x, cc.y, cc.dia)
+
+        }
+
+        function mousePressed() {
+            background(bbac.r, bbac.g, bbac.b)
+        }
+
+    </script>
+</body>
+
+</html>
